@@ -1,6 +1,4 @@
-import json
 import math
-import string
 import time
 from collections import defaultdict
 
@@ -15,26 +13,6 @@ class NaiveBayesClassifier(object):
         self.loglikelihoods = defaultdict(defaultdict)
         self.V = []
         self.n = n_gram
-
-    def compute_prior_and_bigdoc(self, training_set, training_labels):
-        '''
-        Computes the prior and the bigdoc (from the book's algorithm)
-        :param training_set:
-            a list of all documents of the training set
-        :param training_labels:
-            a list of labels corresponding to the documents in the training set
-        :return:
-            None
-        '''
-        for x, y in zip(training_set, training_labels):
-            all_words = x.split(" ")
-            if self.n == 1:
-                grams = all_words
-            else:
-                grams = self.words_to_grams(all_words)
-
-            self.prior[y] += len(grams)
-            self.bigdoc[y].append(x)
 
     def compute_vocabulary(self, documents):
         vocabulary = set()
@@ -107,45 +85,6 @@ class NaiveBayesClassifier(object):
         return sums
 
 
-def loadData():
-    with open("reviews.json", mode="r", encoding="utf-8") as f:
-        reviews = json.load(f)
-    sentiment_numerical_val = {
-        'NEG': 0,
-        'POS': 1
-    }
-    return reviews,sentiment_numerical_val
-
-
-def split_review_data(reviews,sentiment_numerical_val, split=900, remove_punc=False, separation=" "):
-    training_set = []
-    training_labels = []
-    validation_set = []
-    validation_labels = []
-
-    for i, r in enumerate(reviews):
-        # if i==0: print(str(r['content'])); print(dict(r).keys())
-        cv = int(r["cv"])
-        sent = sentiment_numerical_val[r["sentiment"]]
-        content_string = ""
-        for sentence in r["content"]:
-            for word in sentence:
-                content_string += word[0].lower() + separation
-
-        if remove_punc:
-            exclude = set(string.punctuation)
-            content_string = ''.join(character for character in content_string if character not in exclude)
-
-        if 0 < cv < split:
-            training_set.append(content_string)
-            training_labels.append(sent)
-        else:
-            validation_set.append(content_string)
-            validation_labels.append(sent)
-
-    return training_set, np.array(training_labels), validation_set, np.array(validation_labels)
-
-
 def evaluate_predictions(validation_set, validation_labels, trained_classifier, verbose):
     correct_predictions = 0
     predictions_list = []
@@ -176,16 +115,11 @@ def evaluate_predictions(validation_set, validation_labels, trained_classifier, 
     return predictions_list, round(correct_predictions / len(validation_labels) * 100)
 
 
-def launchBayesClassifier():
-    reviews,sentiment_numerical_val= loadData()
-    training_set, training_labels, validation_set, validation_labels = split_review_data(reviews,sentiment_numerical_val)
+def launchBayesClassifier(training_set, training_labels, validation_set, validation_labels):
     start = time.time()
     NBclassifier = NaiveBayesClassifier()
     NBclassifier.train(training_set, training_labels, alpha=1)
     results, acc = evaluate_predictions(validation_set, validation_labels, NBclassifier, verbose=0)
-    print("Testing review - The movie was awesome. I love it")
-    validation_set = ["The movie was awesome. I love it"]
-    validation_labels = [1]
-    results, acc = evaluate_predictions(validation_set, validation_labels, NBclassifier, verbose=1)
     end = time.time()
     print('Ran in {} seconds'.format(round(end - start, 3)))
+    return NBclassifier

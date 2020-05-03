@@ -9,22 +9,12 @@ import time
 
 
 class CNN:
-    def train(self):
+    def train(self,X_train,y_train,X_test,y_test, top_words,input_length):
 
         print()
         print(format('How to setup a CNN model for sentiment analysis in Keras', '*^82'))
 
         start_time = time.time()
-
-        # load libraries
-
-        # load data and Set the number of words we want
-        top_words = 5000
-        input_length = 500
-
-        # Load data and target vector from movie review data
-        (X_train, y_train), (X_test, y_test) = imdb.load_data(num_words=top_words)
-
         print();
         print(X_train.shape);
         print(X_train)
@@ -38,36 +28,36 @@ class CNN:
         print(y_test.shape);
         print(y_test)
 
-        # Convert movie review data to feature matrix
-        X_train = sequence.pad_sequences(X_train, maxlen=input_length)
-        print();
-        print(X_train.shape);
-        print(X_train)
+        embedding_size = 32
 
-        X_test = sequence.pad_sequences(X_test, maxlen=input_length)
-        print();
-        print(X_test.shape);
-        print(X_test)
+        kernel_size = 3
+        filters = 32
+        pool_size = 2
+
+        dense_units1 = 250
+        dense_units2 = 250
+
+        batch_size = 128
+        epochs = 4
 
         # setup a CNN network
         model = Sequential()
-        model.add(Embedding(top_words, 32, input_length=input_length))
-        model.add(Conv1D(filters=32, kernel_size=3, padding='same', activation='relu'))
-        model.add(MaxPooling1D(pool_size=2))
+        model.add(Embedding(top_words, embedding_size, input_length=input_length))
+        model.add(Conv1D(filters=filters, kernel_size=kernel_size, padding='same', activation='relu'))
+        model.add(MaxPooling1D(pool_size=pool_size))
         model.add(Flatten())
-        model.add(Dense(250, activation='relu'))
-        model.add(Dense(1, activation='sigmoid'))
+        model.add(Dense(dense_units1, activation='relu'))
+        model.add(Dense(dense_units2, activation='sigmoid'))
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
         model.summary()
 
         # Fit the model
-        model.fit(X_train, y_train, validation_data=(X_test, y_test),
-                  epochs=4, batch_size=128, verbose=1)
+
+        model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=batch_size, verbose=1)
 
         # Final evaluation of the model
         scores = model.evaluate(X_test, y_test, verbose=1)
         print("Accuracy: %.2f%%" % (scores[1] * 100))
-        max_review_len = 500
         print();
         print("Execution Time %s seconds: " % (time.time() - start_time))
         return model
