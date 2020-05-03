@@ -13,6 +13,7 @@ class LSTM:
         simple_adam = K.optimizers.Adam()
         embed_vec_len = 32  # values per word -- 100-500 is typical
         model = K.models.Sequential()
+
         model.add(K.layers.embeddings.Embedding(input_dim=max_words,
                                                 output_dim=embed_vec_len, embeddings_initializer=e_init,
                                                 mask_zero=True))
