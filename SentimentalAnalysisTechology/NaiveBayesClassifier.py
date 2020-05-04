@@ -3,16 +3,42 @@ import time
 from collections import defaultdict
 
 import numpy as np
+from Model import Model
 
 
-class NaiveBayesClassifier(object):
-    def __init__(self, n_gram=1, printing=False):
+class NaiveBayesClassifier(Model):
+    def __init__(self, max_words_number, max_review_len):
+        super().__init__(max_words_number, max_review_len)
+        self.n_gram = 1,
         self.prior = defaultdict(int)
         self.logprior = {}
         self.bigdoc = defaultdict(list)
         self.loglikelihoods = defaultdict(defaultdict)
         self.V = []
-        self.n = n_gram
+        self.n = self.n_gram
+
+    def toJSON(self):
+        pass
+
+    def defineModel(self, test_x, test_y, train_x, train_y):
+        start = time.time()
+        self.train(train_x, train_y, alpha=1)
+        results, acc = self.evaluate_predictions(test_x, test_y, verbose=0)
+        end = time.time()
+        print('Ran in {} seconds'.format(round(end - start, 3)))
+        return self
+
+    def runModel(self, model):
+        print("Testing review - The movie was awesome. I love it")
+        validation_set = ["The movie was awesome. I love it"]
+        validation_labels = [1]
+        model.evaluate_predictions(validation_set, validation_labels, verbose=1)
+
+    def loadModel(self):
+        pass
+
+    def saveModel(self, model):
+        pass
 
     def compute_vocabulary(self, documents):
         vocabulary = set()
@@ -85,41 +111,32 @@ class NaiveBayesClassifier(object):
         return sums
 
 
-def evaluate_predictions(validation_set, validation_labels, trained_classifier, verbose):
-    correct_predictions = 0
-    predictions_list = []
-    prediction = -1
+    def evaluate_predictions(self,validation_set, validation_labels, verbose):
+        correct_predictions = 0
+        predictions_list = []
+        prediction = -1
 
-    for dataset, label in zip(validation_set, validation_labels):
-        probabilities = trained_classifier.predict(dataset)
-        if verbose == 1:
-            print(probabilities)
-            class1 = 1 / (1 + (math.exp(probabilities[1] - probabilities[0])))
-            class2 = 1 / (1 + (math.exp(probabilities[0] - probabilities[1])))
-            print("Class probability", max(class1, class2) * 100, "%")
-            print(dataset)
+        for dataset, label in zip(validation_set, validation_labels):
+            probabilities = self.predict(dataset)
+            if verbose == 1:
+                print(probabilities)
+                class1 = 1 / (1 + (math.exp(probabilities[1] - probabilities[0])))
+                class2 = 1 / (1 + (math.exp(probabilities[0] - probabilities[1])))
+                print("Class probability", max(class1, class2) * 100, "%")
+                print(dataset)
 
-        if probabilities[0] >= probabilities[1]:
-            prediction = 0
-        elif probabilities[0] < probabilities[1]:
-            prediction = 1
+            if probabilities[0] >= probabilities[1]:
+                prediction = 0
+            elif probabilities[0] < probabilities[1]:
+                prediction = 1
 
-        if prediction == label:
-            correct_predictions += 1
-            predictions_list.append("+")
-        else:
-            predictions_list.append("-")
+            if prediction == label:
+                correct_predictions += 1
+                predictions_list.append("+")
+            else:
+                predictions_list.append("-")
 
-    print("Predicted correctly {} out of {} ({}%)".format(correct_predictions, len(validation_labels),
-                                                          round(correct_predictions / len(validation_labels) * 100, 5)))
-    return predictions_list, round(correct_predictions / len(validation_labels) * 100)
+        print("Predicted correctly {} out of {} ({}%)".format(correct_predictions, len(validation_labels), round(correct_predictions / len(validation_labels) * 100, 5)))
+        return predictions_list, round(correct_predictions / len(validation_labels) * 100)
 
 
-def launchBayesClassifier(training_set, training_labels, validation_set, validation_labels):
-    start = time.time()
-    NBclassifier = NaiveBayesClassifier()
-    NBclassifier.train(training_set, training_labels, alpha=1)
-    results, acc = evaluate_predictions(validation_set, validation_labels, NBclassifier, verbose=0)
-    end = time.time()
-    print('Ran in {} seconds'.format(round(end - start, 3)))
-    return NBclassifier
