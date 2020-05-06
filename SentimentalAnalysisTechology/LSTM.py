@@ -1,7 +1,6 @@
 import keras as K
 
 from Model import Model
-
 class LSTM(Model):
     def __init__(self, max_words_number, max_review_len):
         super().__init__(max_words_number, max_review_len)
@@ -28,8 +27,8 @@ class LSTM(Model):
         recurrent_dropout = 0.2
         dense_units = 1
 
-        bat_size = 32
-        max_epochs = 4
+        bat_size = 128
+        max_epochs = 6
 
         model = K.models.Sequential()
         model.add(
@@ -41,13 +40,16 @@ class LSTM(Model):
         model.compile(loss='binary_crossentropy', optimizer=simple_adam, metrics=['acc'])
         print(model.summary())
         # ==================================================================
-        self.train(model, train_x, train_y, bat_size, max_epochs)
+        history = self.train(model, train_x, train_y, bat_size, max_epochs)
         # 4. evaluate model
-        self.evaluateModel(model, test_x, test_y)
+        eval_epoch_history=self.evaluateModel(model, test_x, test_y)
         # 5. save model
+        # history.history['loss'].append(eval_epoch_history[0])
+        # history.history['acc'].append(eval_epoch_history[1])
+
         self.saveModel(model)
         # 6. use model
-        return model
+        return model,history,eval_epoch_history
 
     def runModel(self, model):
         self.doPrediction(model)
@@ -86,8 +88,15 @@ class LSTM(Model):
         print("Test data: loss = %0.6f  accuracy = %0.2f%% " % \
               (loss_acc[0], loss_acc[1] * 100))
 
+        return loss_acc
+
     def train(self, model, train_x, train_y, bat_size, max_epochs):
         # 3. train model
         print("\nStarting training ")
-        model.fit(train_x, train_y, epochs=max_epochs, batch_size=bat_size, verbose=1)
+        history = model.fit(train_x, train_y, epochs=max_epochs, batch_size=bat_size, verbose=1)
         print("Training complete \n")
+
+        return history
+        #print(history.history)
+        # Plot history: MAE
+

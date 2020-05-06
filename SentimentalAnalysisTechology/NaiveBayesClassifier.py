@@ -26,7 +26,7 @@ class NaiveBayesClassifier(Model):
         results, acc = self.evaluate_predictions(test_x, test_y, verbose=0)
         end = time.time()
         print('Ran in {} seconds'.format(round(end - start, 3)))
-        return self
+        return self,acc
 
     def runModel(self, model):
         print("Testing review - The movie was awesome. I love it")

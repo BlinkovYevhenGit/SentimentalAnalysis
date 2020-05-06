@@ -32,8 +32,8 @@ class CNN_LSTM(Model):
         lstm_output_size = 70
 
         # Training
-        batch_size = 30
-        epochs = 4
+        batch_size = 128
+        epochs = 6
 
         dropout = 0.25
         strides = 1
@@ -55,11 +55,11 @@ class CNN_LSTM(Model):
         model.add(Dense(dense))
         model.add(Activation('sigmoid'))
 
-        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'])
 
-        self.train(batch_size, epochs, model, x_test, x_train, y_test, y_train)
+        history, eval_epoch_history = self.train(batch_size, epochs, model, x_test, x_train, y_test, y_train)
         self.saveModel(model)
-        return model
+        return model,history, eval_epoch_history
 
     def runModel(self, model):
         self.doPrediction(model)
@@ -93,8 +93,9 @@ class CNN_LSTM(Model):
 
     def train(self, batch_size, epochs, model, x_test, x_train, y_test, y_train):
         print('Train...')
-        model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test))
-        score, acc = model.evaluate(x_test, y_test, batch_size=batch_size)
-        print('Test score:', score)
-        print('Test accuracy:', acc)
+        history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test))
+        eval_epoch_history = model.evaluate(x_test, y_test,verbose=1)
+        print('Loss:', eval_epoch_history[0])
+        print('Accuracy:', "%0.2f%%" % (eval_epoch_history[1]*100))
+        return history,eval_epoch_history
 

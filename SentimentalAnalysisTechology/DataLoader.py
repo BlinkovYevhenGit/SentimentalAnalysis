@@ -14,7 +14,7 @@ def loadData(max_words_number, max_review_len):
     return test_x, test_y, train_x, train_y
 
 
-def split_review_data(reviews, sentiment_numerical_val, split=800, remove_punc=False, separation=" "):
+def split_review_data(reviews, sentiment_numerical_val, split=900, remove_punc=False, separation=" "):
     training_set = []
     training_labels = []
     validation_set = []
