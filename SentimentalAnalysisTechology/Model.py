@@ -1,8 +1,7 @@
 
 class Model:
-    def __init__(self, max_words_number, max_review_len):
-        self.max_words_number = max_words_number
-        self.max_review_len = max_review_len
+    def __init__(self,*params):
+        self.configuration=params
         pass
 
     def toJSON(self):

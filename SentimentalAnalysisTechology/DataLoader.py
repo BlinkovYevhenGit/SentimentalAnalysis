@@ -14,7 +14,7 @@ def loadData(max_words_number, max_review_len):
     return test_x, test_y, train_x, train_y
 
 
-def split_review_data(reviews, sentiment_numerical_val, split=900, remove_punc=False, separation=" "):
+def split_review_data(reviews, sentiment_numerical_val, split=900, remove_punc=True, separation=" "):
     training_set = []
     training_labels = []
     validation_set = []
@@ -51,9 +51,44 @@ def loadJSONData():
         'POS': 1
     }
     return reviews, sentiment_numerical_val
+def getIMDB_dataForBayes(num_words, maxlen):
+    #(train_data_raw, train_labels), (test_data_raw, test_labels) = K.datasets.imdb.load_data()#num_words=50000, maxlen=5000
+    train_data_raw, train_labels, test_data_raw, test_labels= loadData(num_words, maxlen)
+    words2idx = K.datasets.imdb.get_word_index()
+    idx2words = {idx: word for word, idx in words2idx.items()}
+    train_set = []
+    # maxLenTest = 0
+    # maxLenTrain = 0
+
+    for review in train_data_raw:
+        train_ex = []
+        length = 0
+        for x in review[0:]:
+            # length = length + 1
+            if x > 3:
+                word = idx2words[x - 3]
+                train_ex.append(word)
+        train_ex = ' '.join(train_ex)
+        # if length > maxLenTrain:
+        #     maxLenTrain = length
+        train_set.append(train_ex)
+    test_set = []
+    for review in test_data_raw:
+        length = 0
+        test_ex = []
+        for x in review[0:]:
+            # length = length + 1
+            if x > 3:
+                word = idx2words[x - 3]
+                test_ex.append(word)
+        # if length > maxLenTest:
+        #     maxLenTest = length
+        test_ex = ' '.join(test_ex)
+        test_set.append(test_ex)
+    return train_set,train_labels,test_set,test_labels
 
 
 def loadBayesData():
-    reviews, sentiment_numerical_val = loadJSONData()
-    training_set, training_labels, validation_set, validation_labels = split_review_data(reviews, sentiment_numerical_val)
+    #reviews, sentiment_numerical_val = loadJSONData()
+    training_set, training_labels, validation_set, validation_labels = getIMDB_dataForBayes(num_words=5000, maxlen=150)
     return training_set, training_labels, validation_set, validation_labels

@@ -5,10 +5,9 @@ from collections import defaultdict
 import numpy as np
 from Model import Model
 
-
 class NaiveBayesClassifier(Model):
-    def __init__(self, max_words_number, max_review_len):
-        super().__init__(max_words_number, max_review_len)
+    def __init__(self,*params):
+        super().__init__(params)
         self.n_gram = 1,
         self.prior = defaultdict(int)
         self.logprior = {}

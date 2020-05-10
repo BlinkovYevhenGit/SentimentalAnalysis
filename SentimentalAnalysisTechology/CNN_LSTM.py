@@ -11,53 +11,42 @@ import keras as K
 
 class CNN_LSTM(Model):
 
-    def __init__(self, max_words_number, max_review_len):
-        super().__init__(max_words_number, max_review_len)
-        self.max_words_number = max_words_number
-        self.max_review_len = max_review_len
+    def __init__(self,*params):
+        super().__init__(params)
+        self.max_words_number = params[0]
+        self.max_review_len = params[1]
+
+        self.configuration = params[2]
+        self.embedding_size, \
+        self.kernel_size, \
+        self.filters, \
+        self.pool_size, \
+        self.lstm_output_size, \
+        self.batch_size, \
+        self.epochs,\
+        self.dropout,\
+        self.strides,\
+        self.dense = self.configuration.getConfig()
 
     def toJSON(self):
         pass
 
     def defineModel(self, x_test, y_test, x_train, y_train):
-        # Embedding
-        embedding_size = 128
 
-        # Convolution
-        kernel_size = 5
-        filters = 64
-        pool_size = 4
-
-        # LSTM
-        lstm_output_size = 70
-
-        # Training
-        batch_size = 128
-        epochs = 6
-
-        dropout = 0.25
-        strides = 1
-        dense = 1
-
-        '''
-        Note:
-        batch_size is highly sensitive.
-        Only 2 epochs are needed as the dataset is very small.
-        '''
         print('Build model...')
 
         model = Sequential()
-        model.add(Embedding(self.max_words_number, embedding_size, input_length=self.max_review_len))
-        model.add(Dropout(dropout))
-        model.add(Conv1D(filters, kernel_size, padding='valid', activation='relu', strides=strides))
-        model.add(MaxPooling1D(pool_size=pool_size))
-        model.add(LSTM(lstm_output_size))
-        model.add(Dense(dense))
+        model.add(Embedding(self.max_words_number, self.embedding_size, input_length=self.max_review_len))
+        model.add(Dropout(self.dropout))
+        model.add(Conv1D(self.filters, self.kernel_size, padding='valid', activation='relu', strides=self.strides))
+        model.add(MaxPooling1D(pool_size=self.pool_size))
+        model.add(LSTM(self.lstm_output_size))
+        model.add(Dense(self.dense))
         model.add(Activation('sigmoid'))
 
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'])
 
-        history, eval_epoch_history = self.train(batch_size, epochs, model, x_test, x_train, y_test, y_train)
+        history, eval_epoch_history = self.train(self.batch_size, self.epochs, model, x_test, x_train, y_test, y_train)
         self.saveModel(model)
         return model,history, eval_epoch_history
 

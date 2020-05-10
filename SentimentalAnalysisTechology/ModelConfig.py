@@ -1,6 +1,10 @@
-class Configuration:
-    pass
 
+class Configuration:
+    def __init__(self, *params):
+        self.config = params
+
+    def getConfig(self):
+        return self.config
 #All the same:
     #embedding_size
     #bat_size

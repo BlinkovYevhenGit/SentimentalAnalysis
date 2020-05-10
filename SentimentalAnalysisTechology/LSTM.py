@@ -1,11 +1,31 @@
 import keras as K
-
+from LSTM_Config import LSTMConfiguration
 from Model import Model
 class LSTM(Model):
-    def __init__(self, max_words_number, max_review_len):
-        super().__init__(max_words_number, max_review_len)
-        self.max_words_number = max_words_number
-        self.max_review_len = max_review_len
+    def __init__(self, *params):
+        super().__init__(params)
+        self.max_words_number = params[0]
+        self.max_review_len = params[1]
+        self.configuration=params[2]
+        self.embed_vec_len,\
+        self.mask_zero,\
+        self.units,\
+        self.dropout,\
+        self.recurrent_dropout,\
+        self.dense_units,\
+        self.bat_size,\
+        self.max_epochs = self.configuration.getConfig()
+        #32  # values per word -- 100-500 is typical
+        # self.mask_zero = params[3][3]True
+        #
+        # self.units = params[3][3]100
+        #
+        # self.dropout = params[3][4]0.2
+        # self.recurrent_dropout = params[3][5]0.2
+        # self.dense_units = params[3][]61
+        #
+        # self.bat_size = params[3][7]128
+        # self.max_epochs = params[3][8]6
 
     def toJSON(self):
         pass
@@ -18,29 +38,19 @@ class LSTM(Model):
         init = K.initializers.glorot_uniform(seed=1)
         simple_adam = K.optimizers.Adam()
 
-        embed_vec_len = 32  # values per word -- 100-500 is typical
-        mask_zero = True
 
-        units = 100
-
-        dropout = 0.2
-        recurrent_dropout = 0.2
-        dense_units = 1
-
-        bat_size = 128
-        max_epochs = 6
 
         model = K.models.Sequential()
         model.add(
-            K.layers.embeddings.Embedding(input_dim=self.max_words_number, output_dim=embed_vec_len, embeddings_initializer=e_init,
-                                          mask_zero=mask_zero))
-        model.add(K.layers.LSTM(units=units, kernel_initializer=init, dropout=dropout,
-                                recurrent_dropout=recurrent_dropout))  # 100 memory
-        model.add(K.layers.Dense(units=dense_units, kernel_initializer=init, activation='sigmoid'))
+            K.layers.embeddings.Embedding(input_dim=self.max_words_number, output_dim=self.embed_vec_len, embeddings_initializer=e_init,
+                                          mask_zero=self.mask_zero))
+        model.add(K.layers.LSTM(units=self.units, kernel_initializer=init, dropout=self.dropout,
+                                recurrent_dropout=self.recurrent_dropout))  # 100 memory
+        model.add(K.layers.Dense(units=self.dense_units, kernel_initializer=init, activation='sigmoid'))
         model.compile(loss='binary_crossentropy', optimizer=simple_adam, metrics=['acc'])
         print(model.summary())
         # ==================================================================
-        history = self.train(model, train_x, train_y, bat_size, max_epochs)
+        history = self.train(model, train_x, train_y, self.bat_size, self.max_epochs)
         # 4. evaluate model
         eval_epoch_history=self.evaluateModel(model, test_x, test_y)
         # 5. save model
