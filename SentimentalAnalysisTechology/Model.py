@@ -10,7 +10,7 @@ class Model:
     def defineModel(self, test_x, test_y, train_x, train_y):
         pass
 
-    def runModel(self, model):
+    def runModel(self, model,userText):
         pass
 
     def loadModel(self):

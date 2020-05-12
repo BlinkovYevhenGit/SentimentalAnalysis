@@ -1,4 +1,7 @@
-import keras as K
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense, Embedding
+import tensorflow.keras as K
+
 from LSTM_Config import LSTMConfiguration
 from Model import Model
 class LSTM(Model):
@@ -40,13 +43,13 @@ class LSTM(Model):
 
 
 
-        model = K.models.Sequential()
+        model = Sequential()
         model.add(
-            K.layers.embeddings.Embedding(input_dim=self.max_words_number, output_dim=self.embed_vec_len, embeddings_initializer=e_init,
+            Embedding(input_dim=self.max_words_number, output_dim=self.embed_vec_len, embeddings_initializer=e_init,
                                           mask_zero=self.mask_zero))
         model.add(K.layers.LSTM(units=self.units, kernel_initializer=init, dropout=self.dropout,
                                 recurrent_dropout=self.recurrent_dropout))  # 100 memory
-        model.add(K.layers.Dense(units=self.dense_units, kernel_initializer=init, activation='sigmoid'))
+        model.add(Dense(units=self.dense_units, kernel_initializer=init, activation='sigmoid'))
         model.compile(loss='binary_crossentropy', optimizer=simple_adam, metrics=['acc'])
         print(model.summary())
         # ==================================================================
@@ -94,7 +97,7 @@ class LSTM(Model):
 
 
     def evaluateModel(self, model, test_x, test_y):
-        loss_acc = model.evaluate(test_x, test_y, verbose=0)
+        loss_acc = model.evaluate(test_x, test_y, verbose=1)
         print("Test data: loss = %0.6f  accuracy = %0.2f%% " % \
               (loss_acc[0], loss_acc[1] * 100))
 

@@ -1,9 +1,9 @@
-from keras.models import Sequential
-from keras.layers import Dense, Flatten
-from keras.layers.convolutional import Conv1D, MaxPooling1D
-from keras.layers.embeddings import Embedding
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.layers import Conv1D, MaxPooling1D
+from tensorflow.keras.layers import Embedding
 import time
-import keras as K
+import tensorflow.keras as K
 from Model import Model
 from pymongo import MongoClient
 import gridfs

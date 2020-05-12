@@ -1,13 +1,13 @@
 import json
 import string
 
-import keras as K
+import tensorflow.keras as K
 import numpy as np
 
-def loadData(max_words_number, max_review_len):
-    print("Loading data, max unique words = %d words\n" % max_words_number)
+def loadData(top_words, max_review_len):
+    print("Loading data, max unique words = %d words\n" % top_words)
     (train_x, train_y), (test_x, test_y) = \
-        K.datasets.imdb.load_data(seed=1, num_words=max_words_number)
+        K.datasets.imdb.load_data(num_words=top_words)
     train_x = K.preprocessing.sequence.pad_sequences(train_x, truncating='pre', padding='pre', maxlen=max_review_len)  # pad and chop!
     test_x = K.preprocessing.sequence.pad_sequences(test_x, truncating='pre', padding='pre', maxlen=max_review_len)
 
@@ -51,9 +51,9 @@ def loadJSONData():
         'POS': 1
     }
     return reviews, sentiment_numerical_val
-def getIMDB_dataForBayes(num_words, maxlen):
+def getIMDB_dataForBayes(top_words, maxlen):
     #(train_data_raw, train_labels), (test_data_raw, test_labels) = K.datasets.imdb.load_data()#num_words=50000, maxlen=5000
-    train_data_raw, train_labels, test_data_raw, test_labels= loadData(num_words, maxlen)
+    train_data_raw, train_labels, test_data_raw, test_labels= loadData(top_words, maxlen)
     words2idx = K.datasets.imdb.get_word_index()
     idx2words = {idx: word for word, idx in words2idx.items()}
     train_set = []
@@ -88,7 +88,7 @@ def getIMDB_dataForBayes(num_words, maxlen):
     return train_set,train_labels,test_set,test_labels
 
 
-def loadBayesData():
+def loadBayesData(top_words, max_words_number):
     #reviews, sentiment_numerical_val = loadJSONData()
-    training_set, training_labels, validation_set, validation_labels = getIMDB_dataForBayes(num_words=5000, maxlen=150)
+    training_set, training_labels, validation_set, validation_labels = getIMDB_dataForBayes(top_words=top_words, maxlen=max_words_number)
     return training_set, training_labels, validation_set, validation_labels

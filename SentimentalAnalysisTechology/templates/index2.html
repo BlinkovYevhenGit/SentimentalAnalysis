@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ua">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+</head>
+<body>
+<div>
+   <form action="/result" method="POST">
+   <H3>Виберіть модель визначення тональності тексту для її навчання</H3>
+       <table>
+           <tr>
+               <td><b>Список моделей:</b></td>
+               <td><b>Конфігурація моделі:</b></td>
+               <td><b>Опис необхідних параметрів:</b></td>
+           <tr>
+               <td><p><input type="checkbox" name="BayesOption" value="1" checked >Наївний Баєсів класифікатор</p></td>
+           </tr>
+           <tr>
+               <td><p><input type="checkbox" name="LSTM_option" value="2" onclick="document.getElementsByName('LSTM_Input')[0].disabled=!this.checked">Нейронна мережа з ДКЧП</p></td>
+               <td><input type="text" disabled name="LSTM_Input" value="32;True;100;0.2;0.2;1;128;3"></td>
+               <td><textarea rows="9"  cols="90" name="text" disabled style="resize:None">
+1. Довжина векторного представлення тексту,
+2.Маска для нульових елементів векторного представлення тексту,
+3.Кількість нейронів у шарі ДКЧП,
+4.Частка нейронів, які не будуть включені в процес навчання,
+5. Ймовірність ігнорування нейроном вхідних сигналів з попереднього стану,
+6.Кількість нейронів у звичайному шарі нейронної мережі,
+7.Розмір вибірки, для здійснення однієї ітерації тренування моделі,
+8.Кількість періодів навчання нейронної мережі
+</textarea></td>
+           </tr>
+           <tr>
+               <td><p><input type="checkbox" name="CombinedOption" value="3" onclick="document.getElementsByName('CombinedInput')[0].disabled=!this.checked">Комбінована нейронна мережа(ДКЧП+ЗНМ)</p></td>
+               <td><input type="text" disabled name="CombinedInput" value="128;5;64;4;70;128;3;0.25;1;1"></td>
+               <td><textarea rows="5" cols="auto"  name="text" disabled style="resize:None">Параметр1, Параметр2</textarea></td>
+           </tr>
+           <tr>
+               <td><p><input type="checkbox" name="CNN_option" value="4" onclick="document.getElementsByName('CNN_Input')[0].disabled=!this.checked">Згорткова нейронна мережа (ЗНМ)</p></td>
+               <td><input type="text" disabled name="CNN_Input" value="32;3;32;2;250;1;128;3"></td>
+               <td><textarea rows="5" cols="50"  name="text" disabled style="resize:None">Параметр1, Параметр2</textarea></td>
+           </tr>
+       </table>
+       <table>
+           <tr>
+               <td><label for="freq">Число частості слів серед у текстах:</label></td>
+               <td><input type="number" id="freq" name="frequency" min="1" max="10000" value="5000" style="width: 5em"></td>
+           </tr>
+           <tr>
+               <td><label for="len">Число слів у текстах:</label></td>
+               <td><input type="number" id="len" name="length"  min="1" max="300" maxlength="3" value="100"  style="width: 5em"></td>
+           </tr>
+           <tr>
+               <td rowspan="2">
+                   <textarea name="inputText" style="resize:None">
+
+                   </textarea>
+               </td>
+           </tr>
+       </table>
+   <p><input type="submit" value="Почати навчання"></p>
+  </form>
+</div>
+</body>
+</html>

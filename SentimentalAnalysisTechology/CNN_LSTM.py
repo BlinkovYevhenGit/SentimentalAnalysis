@@ -1,12 +1,10 @@
-from __future__ import print_function
-
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation
-from keras.layers import Embedding
-from keras.layers import LSTM
-from keras.layers import Conv1D, MaxPooling1D
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Activation
+from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.layers import Conv1D, MaxPooling1D
 from Model import Model
-import keras as K
+import tensorflow.keras as K
 
 
 class CNN_LSTM(Model):
@@ -34,7 +32,6 @@ class CNN_LSTM(Model):
     def defineModel(self, x_test, y_test, x_train, y_train):
 
         print('Build model...')
-
         model = Sequential()
         model.add(Embedding(self.max_words_number, self.embedding_size, input_length=self.max_review_len))
         model.add(Dropout(self.dropout))
