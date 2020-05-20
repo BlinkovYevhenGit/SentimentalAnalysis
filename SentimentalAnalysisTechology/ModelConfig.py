@@ -5,6 +5,13 @@ class Configuration:
 
     def getConfig(self):
         return self.config
+    def getConfigAsString(self,*params):
+        string_config=params[0]
+        i = 1
+        while i<len(params):
+            string_config += ";"+params[i]
+            i += 1
+        return string_config
 #All the same:
     #embedding_size
     #bat_size

@@ -20,3 +20,7 @@ class CNNConfiguration(Configuration):
         self.dense_units2, \
         self.batch_size, \
         self.epochs
+
+    def getConfigAsString(self):
+        string_config = super(self.getConfig())
+        return string_config

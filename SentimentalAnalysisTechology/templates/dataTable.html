@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <h2>Виберіть одну з моделей для проведення аналізу текстів на їх тональність </h2>
+  <h4>Моделі Рекурентної нейронної мережі з ДКЧП :</h4>
+   <div style="max-height:250px; overflow-y: auto;">
+   {{ LSTM_table }}
+  </div>
+    <h4>Моделі Згорткової нейронної мережі :</h4>
+   <div style="max-height:250px; overflow-y: auto;">
+   {{ CNN_table }}
+  </div>
+    <H4>Моделі Комбінованої нейронної мережі:</H4>
+   <div style="max-height:250px; overflow-y: auto;">
+   {{ CNN_LSTM_table }}
+  </div>
+</div>
+</body>
+</html>

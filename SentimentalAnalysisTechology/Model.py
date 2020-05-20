@@ -1,3 +1,4 @@
+import pymongo
 
 class Model:
     def __init__(self,*params):
@@ -10,7 +11,7 @@ class Model:
     def defineModel(self, test_x, test_y, train_x, train_y):
         pass
 
-    def runModel(self, model,userText):
+    def runModel(self, model,userText,review_len):
         pass
 
     def loadModel(self):
@@ -18,6 +19,10 @@ class Model:
 
     def saveModel(self, model):
         pass
+
+
+
+
 
 # TODO: add loading data for all algorithms
 

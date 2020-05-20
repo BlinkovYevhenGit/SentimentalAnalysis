@@ -1,14 +1,19 @@
 <!doctype html>
 <html>
 <body>
-	<h1> {{ prediction }}</h1>
+	<H2>Результати роботи моделей визначення тональності тексту:</H2>
+	<h3>Введений користувачем текст:{{text}}</h3>
+	<h4> {{ baes }}</h4>
+	<h4> {{ cnn_lstm }}</h4>
+	<h4> {{ cnn }}</h4>
+	<h4> {{ lstm }}</h4>
 	<div>
 		<table>
 			<tr>
-				<td><img src="{{url_for('static', filename='graph1.png')}}"></td>
+				<td><img src="{{ graph1 }}"></td>
 			</tr>
 			<tr>
-				<td><img src="{{url_for('static', filename='graph2.png')}}"></td>
+				<td><img src="{{ graph2 }}"></td>
 			</tr>
 		</table>
 	</div>

@@ -24,3 +24,7 @@ class CNN_LSTMConfiguration(Configuration):
         self.dropout,\
         self.strides,\
         self.dense
+
+    def getConfigAsString(self):
+        string_config = super(self.getConfig())
+        return string_config

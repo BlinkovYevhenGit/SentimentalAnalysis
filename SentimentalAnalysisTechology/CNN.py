@@ -5,8 +5,8 @@ from tensorflow.keras.layers import Embedding
 import time
 import tensorflow.keras as K
 from Model import Model
-from pymongo import MongoClient
-import gridfs
+
+from MongoManager import saveToDB, loadModelFromDB, saveConfiguration
 
 
 class CNN(Model):
@@ -24,10 +24,7 @@ class CNN(Model):
         self.dense_units2, \
         self.batch_size, \
         self.epochs = self.configuration.getConfig()
-        self.client = MongoClient("mongodb://localhost:27017/")
-        self.db = self.client['local']
-        self.fs = gridfs.GridFS(self.db)
-        self.fileID=None
+
 
 
     def toJSON(self):
@@ -51,8 +48,6 @@ class CNN(Model):
         print()
         print(y_test.shape)
         print(y_test)
-
-
 
         # setup a CNN network
         model = Sequential()
@@ -81,45 +76,23 @@ class CNN(Model):
         self.saveModel(model)
         return model, history,eval_epoch_history
 
-    def runModel(self, model):
-        self.doPrediction(model)
+    def runModel(self, model,userText,review_len):
+        cnn_result = self.doPrediction(model, userText,review_len)
+        return cnn_result
 
     def loadModel(self, filepath="cnn_model.h5"):
-        #model = K.models.load_model(".\\Models\\%s" % filepath)
-        #model=self.fs.get(filepath)
-        out = self.fs.find_one({"filename": filepath})
+        model = loadModelFromDB(filepath)
 
-        weights_temp = out.read()
-
-        f_out_path = (r'Models\\'+filepath).replace('\\', '/')
-        with open(f_out_path, 'wb') as f:
-            f.write(weights_temp)
-        model = K.models.load_model(".\\Models\\%s" % filepath)
         return model
 
-    def saveModel(self, model, filename="cnn_model.h5"):
-        print("Saving model to database \n")
-        # mp = ".\\Models\\" + filename
-        # model.save(mp)
+    def saveModel(self, model, filename="CNN_model.h5"):
+        saveToDB(filename, model)
+        saveConfiguration(filename.replace(".h5",""),self.max_words_number,self.max_review_len,self.configuration.getConfig(),filename)
 
-
-        self.fileID = self.fs.put(open(r'Models\cnn_model.h5'.replace('\\', '/'), 'rb'), filename="cnn_model.h5")
-
-        # out = fs.get(fileID)
-        #
-        # for grid_out in fs.find({"filename": "cnn_model.h5"}, no_cursor_timeout=True):
-        #     print(grid_out.length)
-        #
-        # weights_temp = out.read()
-        #
-        # f_out_path = r'Models\model_retrieved.h5'.replace('\\', '/')
-        # with open(f_out_path, 'wb') as f:
-        #     f.write(weights_temp)
-
-    def doPrediction(self, model):
-        print("New review: \'The movie was awesome. I love it \'")
+    def doPrediction(self, model, userText, max_review_len):
+        print("New review:" + userText)
         d = K.datasets.imdb.get_word_index()
-        review = "The movie was awesome. I love it"
+        review = userText
         words = review.split()
         review = []
         for word in words:
@@ -129,7 +102,10 @@ class CNN(Model):
                 review.append(d[word] + 3)
 
         review = K.preprocessing.sequence.pad_sequences([review], truncating='pre', padding='pre',
-                                                        maxlen=self.max_review_len)
+                                                        maxlen=max_review_len)
         prediction = model.predict(review)
         print("Prediction (0 = negative, 1 = positive) = ", end="")
         print("%0.4f" % prediction[0][0])
+        cnn_result = "Згорткова нейронна мережа - Прогноз: (0 = негативний, 1 = позитивний) = %0.4f" % \
+                          prediction[0][0]
+        return cnn_result

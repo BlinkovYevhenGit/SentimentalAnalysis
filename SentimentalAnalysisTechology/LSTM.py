@@ -1,9 +1,15 @@
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Embedding
 import tensorflow.keras as K
-
+from keras.callbacks import CSVLogger
+from pymongo import MongoClient
+import gridfs
+import os
 from LSTM_Config import LSTMConfiguration
 from Model import Model
+from MongoManager import saveToDB, loadModelFromDB, saveConfiguration
+
+
 class LSTM(Model):
     def __init__(self, *params):
         super().__init__(params)
@@ -18,6 +24,7 @@ class LSTM(Model):
         self.dense_units,\
         self.bat_size,\
         self.max_epochs = self.configuration.getConfig()
+
         #32  # values per word -- 100-500 is typical
         # self.mask_zero = params[3][3]True
         #
@@ -44,9 +51,7 @@ class LSTM(Model):
 
 
         model = Sequential()
-        model.add(
-            Embedding(input_dim=self.max_words_number, output_dim=self.embed_vec_len, embeddings_initializer=e_init,
-                                          mask_zero=self.mask_zero))
+        model.add(Embedding(input_dim=self.max_words_number, output_dim=self.embed_vec_len, embeddings_initializer=e_init, mask_zero=self.mask_zero))
         model.add(K.layers.LSTM(units=self.units, kernel_initializer=init, dropout=self.dropout,
                                 recurrent_dropout=self.recurrent_dropout))  # 100 memory
         model.add(Dense(units=self.dense_units, kernel_initializer=init, activation='sigmoid'))
@@ -64,22 +69,22 @@ class LSTM(Model):
         # 6. use model
         return model,history,eval_epoch_history
 
-    def runModel(self, model):
-        self.doPrediction(model)
+    def runModel(self, model,userText,review_len):
+        lstm_result =self.doPrediction(model,userText,review_len)
+        return lstm_result
 
     def loadModel(self, filepath="lstm_model.h5"):
-        model = K.models.load_model(".\\Models\\%s" % filepath)
+        model = loadModelFromDB(filepath)
         return model
 
     def saveModel(self, model, filename="lstm_model.h5"):
-        print("Saving model to disk \n")
-        mp = ".\\Models\\" + filename
-        model.save(mp)
+        saveToDB(filename, model)
+        saveConfiguration(filename.replace(".h5",""),self.max_words_number,self.max_review_len,self.configuration.getConfig(),filename)
 
-    def doPrediction(self, model):
-        print("New review: \'The movie was awesome. I love it \'")
+    def doPrediction(self, model, userText, max_review_len):
+        print("New review:" + userText)
         d = K.datasets.imdb.get_word_index()
-        review = "The movie was awesome. I love it"
+        review = userText
         words = review.split()
         review = []
         for word in words:
@@ -89,10 +94,14 @@ class LSTM(Model):
                 review.append(d[word] + 3)
 
         review = K.preprocessing.sequence.pad_sequences([review], truncating='pre', padding='pre',
-                                                        maxlen=self.max_review_len)
+                                                        maxlen=max_review_len)
         prediction = model.predict(review)
         print("Prediction (0 = negative, 1 = positive) = ", end="")
         print("%0.4f" % prediction[0][0])
+        lstm_result = "Рекурентна нейронна мережа з довгою короткочасною пам'яттю - Прогноз: (0 = негативний, 1 = позитивний) = %0.4f" % \
+                     prediction[0][0]
+        return lstm_result
+
 
 
 
@@ -106,7 +115,8 @@ class LSTM(Model):
     def train(self, model, train_x, train_y, bat_size, max_epochs):
         # 3. train model
         print("\nStarting training ")
-        history = model.fit(train_x, train_y, epochs=max_epochs, batch_size=bat_size, verbose=1)
+        csv_logger = CSVLogger('lstm_log.csv',append=True,separator=";")
+        history = model.fit(train_x, train_y, epochs=max_epochs, batch_size=bat_size, verbose=1, callbacks=[csv_logger])
         print("Training complete \n")
 
         return history

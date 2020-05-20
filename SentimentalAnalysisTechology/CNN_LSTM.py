@@ -1,10 +1,16 @@
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, Activation
+from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Embedding
 from tensorflow.keras.layers import LSTM
 from tensorflow.keras.layers import Conv1D, MaxPooling1D
 from Model import Model
+from pymongo import MongoClient
+import gridfs
 import tensorflow.keras as K
+from keras.callbacks import CSVLogger
+
+
+from MongoManager import saveToDB, loadModelFromDB, saveConfiguration
 
 
 class CNN_LSTM(Model):
@@ -25,6 +31,9 @@ class CNN_LSTM(Model):
         self.dropout,\
         self.strides,\
         self.dense = self.configuration.getConfig()
+        self.client = MongoClient("mongodb://localhost:27017/")
+        self.db = self.client['local']
+        self.fs = gridfs.GridFS(self.db)
 
     def toJSON(self):
         pass
@@ -34,12 +43,12 @@ class CNN_LSTM(Model):
         print('Build model...')
         model = Sequential()
         model.add(Embedding(self.max_words_number, self.embedding_size, input_length=self.max_review_len))
-        model.add(Dropout(self.dropout))
-        model.add(Conv1D(self.filters, self.kernel_size, padding='valid', activation='relu', strides=self.strides))
+        #model.add(Dropout(self.dropout))
+        model.add(Conv1D(self.filters, self.kernel_size, padding='same', activation='relu',))
         model.add(MaxPooling1D(pool_size=self.pool_size))
-        model.add(LSTM(self.lstm_output_size))
-        model.add(Dense(self.dense))
-        model.add(Activation('sigmoid'))
+        model.add(LSTM(self.lstm_output_size, dropout=self.dropout, recurrent_dropout=self.dropout))
+        model.add(Dense(self.dense, activation="sigmoid"))
+        # model.add(Activation('sigmoid'))
 
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'])
 
@@ -47,22 +56,22 @@ class CNN_LSTM(Model):
         self.saveModel(model)
         return model,history, eval_epoch_history
 
-    def runModel(self, model):
-        self.doPrediction(model)
+    def runModel(self, model,userText,review_len):
+        cnn_lstm_result = self.doPrediction(model, userText,review_len)
+        return cnn_lstm_result
 
     def loadModel(self, filepath="cnn_lstm_model.h5"):
-        model = K.models.load_model(".\\Models\\%s" % filepath)
+        model = loadModelFromDB(filepath)
         return model
 
     def saveModel(self, model, filename="cnn_lstm_model.h5"):
-        print("Saving model to disk \n")
-        mp = ".\\Models\\" + filename
-        model.save(mp)
+        saveToDB(filename, model)
+        saveConfiguration(filename.replace(".h5",""),self.max_words_number,self.max_review_len,self.configuration.getConfig(),filename)
 
-    def doPrediction(self, model):
-        print("New review: \'The movie was awesome. I love it \'")
+    def doPrediction(self, model, userText, max_review_len):
+        print("New review:" + userText)
         d = K.datasets.imdb.get_word_index()
-        review = "The movie was awesome. I love it"
+        review = userText
         words = review.split()
         review = []
         for word in words:
@@ -72,14 +81,17 @@ class CNN_LSTM(Model):
                 review.append(d[word] + 3)
 
         review = K.preprocessing.sequence.pad_sequences([review], truncating='pre', padding='pre',
-                                                        maxlen=self.max_review_len)
+                                                        maxlen=max_review_len)
         prediction = model.predict(review)
         print("Prediction (0 = negative, 1 = positive) = ", end="")
         print("%0.4f" % prediction[0][0])
+        cnn_lstm_result="Комбінована нейронна мережа(ДКЧП+ЗНМ) - Прогноз: (0 = негативний, 1 = позитивний) = %0.4f" % prediction[0][0]
+        return cnn_lstm_result
 
     def train(self, batch_size, epochs, model, x_test, x_train, y_test, y_train):
         print('Train...')
-        history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test))
+        csv_logger = CSVLogger('cnn_lstm_log.csv',append=True,separator=";")
+        history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(x_test, y_test), callbacks=[csv_logger])
         eval_epoch_history = model.evaluate(x_test, y_test,verbose=1)
         print('Loss:', eval_epoch_history[0])
         print('Accuracy:', "%0.2f%%" % (eval_epoch_history[1]*100))

@@ -22,17 +22,17 @@ class NaiveBayesClassifier(Model):
     def defineModel(self, test_x, test_y, train_x, train_y):
         start = time.time()
         self.train(train_x, train_y, alpha=1)
-        results, acc = self.evaluate_predictions(test_x, test_y, verbose=0)
+        results, acc,bayes_result = self.evaluate_predictions(test_x, test_y, verbose=0)
         end = time.time()
         print('Ran in {} seconds'.format(round(end - start, 3)))
         return self,acc
 
-    def runModel(self, model):
-        print("Testing review - The movie was awesome. I love it")
-        validation_set = ["The movie was awesome. I love it"]
+    def runModel(self, model,userText, review_len):
+        print("Testing review - "+userText)
+        validation_set = [userText]
         validation_labels = [1]
-        model.evaluate_predictions(validation_set, validation_labels, verbose=1)
-
+        results, acc,bayes_result=model.evaluate_predictions(validation_set, validation_labels, verbose=1)
+        return results, acc,bayes_result
     def loadModel(self):
         pass
 
@@ -114,7 +114,7 @@ class NaiveBayesClassifier(Model):
         correct_predictions = 0
         predictions_list = []
         prediction = -1
-
+        bayes_result=""
         for dataset, label in zip(validation_set, validation_labels):
             probabilities = self.predict(dataset)
             if verbose == 1:
@@ -122,8 +122,7 @@ class NaiveBayesClassifier(Model):
                 class1 = 1 / (1 + (math.exp(probabilities[1] - probabilities[0])))
                 class2 = 1 / (1 + (math.exp(probabilities[0] - probabilities[1])))
                 print("Class probability", max(class1, class2) * 100, "%")
-                print(dataset)
-
+                bayes_result = "Наївний Баєсів Класифікатор - Прогноз: (ймовірність класу \'негативний\' = {0}, ймовірність класу \'позитивний\' = {1})".format(str(class1), str(class2))
             if probabilities[0] >= probabilities[1]:
                 prediction = 0
             elif probabilities[0] < probabilities[1]:
@@ -136,6 +135,6 @@ class NaiveBayesClassifier(Model):
                 predictions_list.append("-")
 
         print("Predicted correctly {} out of {} ({}%)".format(correct_predictions, len(validation_labels), round(correct_predictions / len(validation_labels) * 100, 5)))
-        return predictions_list, round(correct_predictions / len(validation_labels) * 100)
+        return predictions_list, round(correct_predictions / len(validation_labels) * 100),bayes_result
 
 

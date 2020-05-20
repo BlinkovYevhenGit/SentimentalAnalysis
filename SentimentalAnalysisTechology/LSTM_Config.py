@@ -20,3 +20,7 @@ class LSTMConfiguration(Configuration):
                self.dense_units,\
                self.bat_size,\
                self.max_epochs
+
+    def getConfigAsString(self):
+        string_config = super(self.getConfig())
+        return string_config

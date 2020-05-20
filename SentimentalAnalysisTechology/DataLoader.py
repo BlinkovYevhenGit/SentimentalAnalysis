@@ -7,7 +7,7 @@ import numpy as np
 def loadData(top_words, max_review_len):
     print("Loading data, max unique words = %d words\n" % top_words)
     (train_x, train_y), (test_x, test_y) = \
-        K.datasets.imdb.load_data(num_words=top_words)
+        K.datasets.imdb.load_data(seed=1,num_words=top_words)
     train_x = K.preprocessing.sequence.pad_sequences(train_x, truncating='pre', padding='pre', maxlen=max_review_len)  # pad and chop!
     test_x = K.preprocessing.sequence.pad_sequences(test_x, truncating='pre', padding='pre', maxlen=max_review_len)
 
