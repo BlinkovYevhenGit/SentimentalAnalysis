@@ -5,7 +5,7 @@ import os
 
 from tensorflow import keras as K
 
-from DataTable import DataTable, ModelTable
+from DataTable import DataTable, ModelTable, ResultTable
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client['local']
@@ -69,3 +69,7 @@ def findRecordById(id):
 
 def makeModelTable(data):
     return ModelTable(data)
+
+def makeResultTable(data):
+    return ResultTable(data)
+

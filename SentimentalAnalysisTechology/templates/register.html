@@ -1,0 +1,51 @@
+<html>
+  <head>
+    <title>Flask Intro - login page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  </head>
+  <body>
+  <div class="container">
+      <h1>Реєстрація нового користувача</h1>
+    <form action="register" method="post">
+        <table class="table-condensed">
+            <tr>
+                <td><p>Введіть логін: </p></td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Ваш логін" name="username" value="{{
+          request.form.username }}">
+                </td>
+            </tr>
+            <tr>
+                <td><p>Введіть пароль: </p></td>
+                <td>
+                    <input type="password" class="form-control" placeholder="Ваш пароль" name="password" value="{{
+          request.form.password }}">
+                </td>
+            </tr>
+            <tr>
+                <td><p>Повторіть пароль: </p></td>
+                <td>
+                    <input type="password" class="form-control" placeholder="Повтор паролю" name="repeatPassword" value="{{
+          request.form.repeatPassword }}">
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td align="center">
+                   <input class="btn btn-default" type="submit" value="Створити користувача">
+                </td>
+            </tr>
+             <tr>
+                <td align="justify" colspan="2">
+                     {% if error %}
+        <p class="error"><strong>Помилка:</strong> {{ error }}
+      {% endif %}
+                </td>
+                <td></td>
+            </tr>
+        </table>
+    </form>
+  </div>
+  </body>
+</html>

@@ -19,3 +19,10 @@ class ModelTable(Table):
         MaxReviewLen = Col('Довжина тексту')
         Configuration = Col('Конфігурація моделі')
         ModelFileName = Col('Назва файлу з моделлю')
+
+class ResultTable(Table):
+        classes = ['table', 'table-striped', 'table-condensed', 'table-hover']
+        Text = Col('Назва моделі')
+        Prediction = Col('Значення тональності')
+        PredictionClass = Col('Визначений клас тексту')
+

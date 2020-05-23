@@ -17,42 +17,63 @@ from CNN_LSTM_Config import CNN_LSTMConfiguration
 
 class Estimator:
 
-    def estimate(self, top_words,max_words_number,LSTM_Config, CNN_Config,CNN_LSTM_Config, userText):
-        deleteAllModels()
+    def estimate(self, top_words,max_words_number,Bayes_Input,LSTM_Config, CNN_Config,CNN_LSTM_Config, userText):
+        #deleteAllModels()
         accList = dict()
         lossList = dict()
 
         histories = list()
         predictions=list()
+        text_results = ["", "", "",""]
+        textTones = ["", "", "",""]
+        definedClasses = ["", "", "",""]
+        if Bayes_Input=="useBayes":
+            bayesResults,results, acc,bayesPrediction,classTone,definedClass  = self.estimateBayes(top_words, max_words_number, userText)
+            accList.update({"Naive Bayes": bayesResults / 100})
+            predictions.append(bayesPrediction)
+            text_results[0] = bayesPrediction
+            textTones[0] = "{:.3f}".format(classTone)
+            definedClasses[0] = definedClass
+        if len(CNN_LSTM_Config)!=0:
+            historyCNN_LSTM, evalCNN_LSTM,cnn_lstmPrediction,classTone, definedClass  = self.estimateCNN_LSTM(top_words, max_words_number, CNN_LSTM_Config, userText)
 
-        bayesResults,bayesPrediction = self.runBayes(top_words,max_words_number,userText)
-        accList.update({"Naive Bayes": bayesResults / 100})
-        predictions.append(bayesPrediction)
-        historyCNN_LSTM, evalCNN_LSTM,cnn_lstmPrediction = self.runCNN_LSTM(top_words,max_words_number,CNN_LSTM_Config,userText)
+            histories.append(tuple(("CNN_LSTM", historyCNN_LSTM)))
+            lossList.update({"CNN_LSTM": evalCNN_LSTM[0]})
+            accList.update({"CNN_LSTM": evalCNN_LSTM[1]})
+            predictions.append(cnn_lstmPrediction)
+            text_results[1] = cnn_lstmPrediction
+            textTones[1] = "{:.3f}".format(classTone)
+            definedClasses[1] = definedClass
 
-        histories.append(tuple(("CNN_LSTM", historyCNN_LSTM)))
-        lossList.update({"CNN_LSTM": evalCNN_LSTM[0]})
-        accList.update({"CNN_LSTM": evalCNN_LSTM[1]})
-        predictions.append(cnn_lstmPrediction)
+        if len(CNN_Config) != 0:
+            historyCNN, evalCNN,cnnPrediction,classTone, definedClass  =  self.estimateCNN(top_words, max_words_number, CNN_Config, userText)
 
+            histories.append(tuple(("CNN", historyCNN)))
+            lossList.update({"CNN": evalCNN[0]})
+            accList.update({"CNN": evalCNN[1]})
+            predictions.append(cnnPrediction)
+            text_results[2] = cnnPrediction
+            textTones[2] = "{:.3f}".format(classTone)
+            definedClasses[2] = definedClass
+        if len(LSTM_Config) != 0:
+            historyLSTM, evalLSTM,LSTM_Prediction,classTone, definedClass  = self.estimateLSTM(top_words, max_words_number, LSTM_Config, userText)
 
-        historyCNN, evalCNN,cnnPrediction =  self.runCNN(top_words,max_words_number,CNN_Config,userText)
-
-        histories.append(tuple(("CNN", historyCNN)))
-        lossList.update({"CNN": evalCNN[0]})
-        accList.update({"CNN": evalCNN[1]})
-        predictions.append(cnnPrediction)
-
-        historyLSTM, evalLSTM,LSTM_Prediction = self.runLSTM(top_words,max_words_number,LSTM_Config,userText)
-
-        histories.append(tuple(("LSTM", historyLSTM)))
-        lossList.update({"LSTM": evalLSTM[0]})
-        accList.update({"LSTM": evalLSTM[1]})
-        predictions.append(LSTM_Prediction)
-
+            histories.append(tuple(("LSTM", historyLSTM)))
+            lossList.update({"LSTM": evalLSTM[0]})
+            accList.update({"LSTM": evalLSTM[1]})
+            predictions.append(LSTM_Prediction)
+            text_results[3] = LSTM_Prediction
+            textTones[3] = "{:.3f}".format(classTone)
+            definedClasses[3] = definedClass
+        tableResult = [dict(Text=text_results[0], Prediction=textTones[0], PredictionClass=definedClasses[0]),
+                       dict(Text=text_results[1], Prediction=textTones[1], PredictionClass=definedClasses[1]),
+                       dict(Text=text_results[2], Prediction=textTones[2], PredictionClass=definedClasses[2]),
+                       dict(Text=text_results[3], Prediction=textTones[3], PredictionClass=definedClasses[3])]
         plot = self.outputGraph(histories)
         self.showTestResultsGraph(accList, lossList, plot)
-        return histories,lossList,accList,predictions
+
+        print(tableResult)
+        return histories,lossList,accList,predictions,text_results, tableResult
 
     def showTestResultsGraph(self, accList, lossList, plot):
         accNames = list(accList.keys())
@@ -83,7 +104,7 @@ class Estimator:
         plt.savefig("./static/graphs/graph2.png")
         return plt
 
-    def runLSTM(self, top_words, review_len, LSTM_Config, userText):
+    def estimateLSTM(self, top_words, review_len, LSTM_Config, userText):
 
         #config = LSTMConfiguration(32, True, 100, 0.2, 0.2, 1, 128, 3)
         config = LSTMConfiguration(LSTM_Config[0],LSTM_Config[1],LSTM_Config[2],LSTM_Config[3],
@@ -98,13 +119,11 @@ class Estimator:
 
         # model = lstm.loadModel()
 
-        lstm_result = lstm.runModel(model, userText, review_len)
+        lstm_result,prediction, definedClass = lstm.runModel(model, userText, review_len)
 
+        return history, eval_epoch_history,lstm_result,prediction, definedClass
 
-
-        return history, eval_epoch_history,lstm_result
-
-    def runCNN(self, top_words, review_len, CNN_Config, userText):
+    def estimateCNN(self, top_words, review_len, CNN_Config, userText):
         # embedding_size = 32
         #
         # kernel_size = 3
@@ -125,10 +144,10 @@ class Estimator:
         model, history, eval_epoch_history = cnn.defineModel(test_x, test_y, train_x, train_y)
 
         #model = cnn.loadModel()
-        cnn_result =cnn.runModel(model, userText, review_len)
-        return history, eval_epoch_history,cnn_result
+        cnn_result,prediction, definedClass =cnn.runModel(model, userText, review_len)
+        return history, eval_epoch_history,cnn_result,prediction, definedClass
 
-    def runCNN_LSTM(self, top_words, review_len, CNN_LSTM_Config, userText):
+    def estimateCNN_LSTM(self, top_words, review_len, CNN_LSTM_Config, userText):
         # embedding_size = 128
         #
         # # Convolution
@@ -157,10 +176,10 @@ class Estimator:
         model, history, eval_epoch_history = cnn_lstm.defineModel(test_x, test_y, train_x, train_y)
 
         #model = cnn_lstm.loadModel()
-        cnn_lstm_result = cnn_lstm.runModel(model, userText, review_len)
-        return history, eval_epoch_history,cnn_lstm_result
+        cnn_lstm_result,prediction, definedClass = cnn_lstm.runModel(model, userText, review_len)
+        return history, eval_epoch_history,cnn_lstm_result,prediction, definedClass
 
-    def runBayes(self, top_words, review_len, userText):
+    def estimateBayes(self, top_words, review_len, userText):
         training_set, training_labels, validation_set, validation_labels = loadBayesData(top_words, review_len)
         print(training_set[0], training_labels[0])
         print(validation_set[0], validation_labels[0])
@@ -168,9 +187,51 @@ class Estimator:
         NBClassifier = NaiveBayesClassifier()
         model, train_results = NBClassifier.defineModel(validation_set, validation_labels, training_set,
                                                         training_labels)
-        results, acc,bayes_result=NBClassifier.runModel(model,userText,None)
-        return train_results,bayes_result
+        results, acc, bayes_result,classTone,definedClass=NBClassifier.runModel(model,userText,None)
+        return train_results,results,acc,bayes_result,classTone,definedClass
 
+    def runCNN(self,filename,review_len,userText):
+        cnn = CNN()
+        model = cnn.loadModel(filename)
+        cnn_result,prediction, definedClass = cnn.runModel(model, userText, review_len)
+        return cnn_result,prediction, definedClass
+
+    def runCNN_LSTM(self, filename, review_len, userText):
+        cnn_lstm = CNN_LSTM()
+        model = cnn_lstm.loadModel(filename)
+        cnn_lstm_result,prediction, definedClass = cnn_lstm.runModel(model, userText, review_len)
+        return cnn_lstm_result,prediction, definedClass
+
+    def runLSTM(self, filename, review_len, userText):
+        lstm = LSTM()
+        model = lstm.loadModel(filename)
+        lstm_result,prediction, definedClass = lstm.runModel(model, userText, review_len)
+        return lstm_result,prediction, definedClass
+
+    def runAll(self,filenames,review_len_s,userText):
+        results=["","",""]
+        classTones=["","",""]
+        definedClasses=["","",""]
+        if filenames[0]!=None:
+            modelName,classTone, definedClass=self.runLSTM(filenames[0],review_len_s[0],userText)
+            results[0]=modelName
+            classTones[0] = "{:.3f}".format(classTone)
+            definedClasses[0] = definedClass
+        if filenames[1]!=None:
+            modelName,classTone, definedClass=self.runCNN(filenames[1],review_len_s[1],userText)
+            results[1]=modelName
+            classTones[1] = "{:.3f}".format(classTone)
+            definedClasses[1] = definedClass
+        if filenames[2]!=None:
+            modelName,classTone, definedClass=self.runCNN_LSTM(filenames[2],review_len_s[2],userText)
+            results[2]=modelName
+            classTones[2] = "{:.3f}".format(classTone)
+            definedClasses[2] = definedClass
+        tableResult=[dict(Text=results[0],Prediction=classTones[0],PredictionClass=definedClasses[0]),dict(Text=results[1],Prediction=classTones[1],PredictionClass=definedClasses[1]),dict(Text=results[2],Prediction=classTones[2],PredictionClass=definedClasses[2])]
+        # for r,p,d in results,predictions,definedClasses:
+        #     tableResult.append(dict(Text=r,Prediction=p,PredictionClass=d))
+        print(tableResult)
+        return results,tableResult
 def deleteSavedImages():
     print("Removing old graphs... \n")
     mp = ".\\static\\graphs\\"

@@ -14,7 +14,7 @@ class Model:
     def runModel(self, model,userText,review_len):
         pass
 
-    def loadModel(self):
+    def loadModel(self,filename):
         pass
 
     def saveModel(self, model):

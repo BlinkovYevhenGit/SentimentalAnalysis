@@ -17,6 +17,7 @@ class CNN_LSTM(Model):
 
     def __init__(self,*params):
         super().__init__(params)
+        if len(params)==0:return
         self.max_words_number = params[0]
         self.max_review_len = params[1]
 
@@ -57,8 +58,8 @@ class CNN_LSTM(Model):
         return model,history, eval_epoch_history
 
     def runModel(self, model,userText,review_len):
-        cnn_lstm_result = self.doPrediction(model, userText,review_len)
-        return cnn_lstm_result
+        cnn_lstm_result,prediction,definedClass  = self.doPrediction(model, userText,review_len)
+        return cnn_lstm_result,prediction,definedClass
 
     def loadModel(self, filepath="cnn_lstm_model.h5"):
         model = loadModelFromDB(filepath)
@@ -66,7 +67,7 @@ class CNN_LSTM(Model):
 
     def saveModel(self, model, filename="cnn_lstm_model.h5"):
         saveToDB(filename, model)
-        saveConfiguration(filename.replace(".h5",""),self.max_words_number,self.max_review_len,self.configuration.getConfig(),filename)
+        saveConfiguration("cnn_lstm_model",self.max_words_number,self.max_review_len,self.configuration.getConfig(),filename)
 
     def doPrediction(self, model, userText, max_review_len):
         print("New review:" + userText)
@@ -85,8 +86,14 @@ class CNN_LSTM(Model):
         prediction = model.predict(review)
         print("Prediction (0 = negative, 1 = positive) = ", end="")
         print("%0.4f" % prediction[0][0])
-        cnn_lstm_result="Комбінована нейронна мережа(ДКЧП+ЗНМ) - Прогноз: (0 = негативний, 1 = позитивний) = %0.4f" % prediction[0][0]
-        return cnn_lstm_result
+
+        cnn_lstm_result="Комбінована нейронна мережа(ДКЧП+ЗНМ)"
+        definedClass = ""
+        if prediction[0][0] >= 0.5:
+            definedClass = "Позитивний"
+        else:
+            definedClass = "Негативний"
+        return cnn_lstm_result, prediction[0][0], definedClass
 
     def train(self, batch_size, epochs, model, x_test, x_train, y_test, y_train):
         print('Train...')

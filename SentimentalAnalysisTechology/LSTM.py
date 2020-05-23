@@ -13,6 +13,8 @@ from MongoManager import saveToDB, loadModelFromDB, saveConfiguration
 class LSTM(Model):
     def __init__(self, *params):
         super().__init__(params)
+        if len(params)==0:return
+
         self.max_words_number = params[0]
         self.max_review_len = params[1]
         self.configuration=params[2]
@@ -36,6 +38,7 @@ class LSTM(Model):
         #
         # self.bat_size = params[3][7]128
         # self.max_epochs = params[3][8]6
+
 
     def toJSON(self):
         pass
@@ -70,8 +73,8 @@ class LSTM(Model):
         return model,history,eval_epoch_history
 
     def runModel(self, model,userText,review_len):
-        lstm_result =self.doPrediction(model,userText,review_len)
-        return lstm_result
+        lstm_result,prediction,definedClass  =self.doPrediction(model,userText,review_len)
+        return lstm_result,prediction,definedClass
 
     def loadModel(self, filepath="lstm_model.h5"):
         model = loadModelFromDB(filepath)
@@ -79,7 +82,7 @@ class LSTM(Model):
 
     def saveModel(self, model, filename="lstm_model.h5"):
         saveToDB(filename, model)
-        saveConfiguration(filename.replace(".h5",""),self.max_words_number,self.max_review_len,self.configuration.getConfig(),filename)
+        saveConfiguration("lstm_model",self.max_words_number,self.max_review_len,self.configuration.getConfig(),filename)
 
     def doPrediction(self, model, userText, max_review_len):
         print("New review:" + userText)
@@ -98,9 +101,13 @@ class LSTM(Model):
         prediction = model.predict(review)
         print("Prediction (0 = negative, 1 = positive) = ", end="")
         print("%0.4f" % prediction[0][0])
-        lstm_result = "Рекурентна нейронна мережа з довгою короткочасною пам'яттю - Прогноз: (0 = негативний, 1 = позитивний) = %0.4f" % \
-                     prediction[0][0]
-        return lstm_result
+        lstm_result = "Рекурентна нейронна мережа з довгою короткочасною пам'яттю (ДКЧП)"
+        definedClass = ""
+        if prediction[0][0] >= 0.5:
+            definedClass = "Позитивний"
+        else:
+            definedClass = "Негативний"
+        return lstm_result,prediction[0][0],definedClass
 
 
 
