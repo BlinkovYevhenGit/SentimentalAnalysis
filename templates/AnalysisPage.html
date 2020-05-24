@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ua">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+   <form action="/result" method="POST">
+   <H3>Виберіть модель визначення тональності тексту для її навчання</H3>
+       <table class="table table-condensed" style="margin:0px">
+           <tr>
+               <td><b>Список моделей:</b></td>
+               <td><b>Конфігурація моделі:</b></td>
+               <td><b>Опис необхідних параметрів:</b></td>
+           </tr>
+           <tr id="BayesTr" class="active">
+               <td style="vertical-align:middle"><p><input type="checkbox" name="BayesOption" value="1" checked onclick="document.getElementsByName('Bayes_Input')[0].disabled=!this.checked;
+                myFunction(document.getElementById('BayesTr'));">Наївний Баєсів класифікатор</p></td>
+               <td style="vertical-align:middle"><input type="hidden" name="Bayes_Input" value="useBayes"></td>
+               <td></td>
+
+           </tr>
+           <tr id="LSTMTr">
+               <td style="vertical-align:middle"><p ><input type="checkbox" name="LSTM_option" value="2"  onclick="document.getElementsByName('LSTM_Input')[0].disabled=!this.checked;
+                myFunction(document.getElementById('LSTMTr'));">Нейронна мережа з ДКЧП</p></td>
+               <td style="vertical-align:middle"><input type="text" class="form-control" disabled name="LSTM_Input" value="32;True;100;0.2;0.2;1;128;3" style=" margin-bottom:0px;"></td>
+               <td style="vertical-align:middle"><div class="panel panel-default" style=" margin-bottom:0px; height:80px; overflow-y: auto;"><div class="panel-body">
+1. Довжина векторного представлення тексту,<br>
+2.Маска для нульових елементів векторного представлення тексту,<br>
+3.Кількість нейронів у шарі ДКЧП,<br>
+4.Частка нейронів, які не будуть включені в процес навчання,<br>
+5. Ймовірність ігнорування нейроном вхідних сигналів з попереднього стану,<br>
+6.Кількість нейронів у звичайному шарі нейронної мережі,<br>
+7.Розмір вибірки, для здійснення однієї ітерації тренування моделі,
+8.Кількість періодів навчання нейронної мережі
+               </div></div></td>
+           </tr>
+           <tr id="CombinedTr">
+               <td style="vertical-align:middle"><p><input type="checkbox"  name="CombinedOption" value="3" onclick="document.getElementsByName('CombinedInput')[0].disabled=!this.checked;
+                myFunction(document.getElementById('CombinedTr'));">Комбінована нейронна мережа(ДКЧП+ЗНМ)</p></td>
+               <td style="vertical-align:middle"><input type="text" class="form-control" disabled name="CombinedInput" value="32;3;32;2;100;32;5;0.05;1;1"></td>
+               <td style="vertical-align:middle"><div class="panel panel-default" style=" margin-bottom:0px; height:80px; overflow-y: auto;"><div class="panel-body">
+1. Довжина векторного представлення тексту,<br>
+2.Маска для нульових елементів векторного представлення тексту,<br>
+3.Кількість нейронів у шарі ДКЧП,<br>
+4.Частка нейронів, які не будуть включені в процес навчання,<br>
+5. Ймовірність ігнорування нейроном вхідних сигналів з попереднього стану,<br>
+6.Кількість нейронів у звичайному шарі нейронної мережі,<br>
+7.Розмір вибірки, для здійснення однієї ітерації тренування моделі,
+8.Кількість періодів навчання нейронної мережі
+               </div></div></td>
+           </tr>
+           <tr id="CNNTr">
+               <td style="vertical-align:middle"><p><input type="checkbox" name="CNN_option" value="4" onclick="document.getElementsByName('CNN_Input')[0].disabled=!this.checked;
+                myFunction(document.getElementById('CNNTr'));">Згорткова нейронна мережа (ЗНМ)</p></td>
+               <td style="vertical-align:middle"><input type="text" class="form-control" disabled name="CNN_Input" value="32;3;32;2;250;1;128;3"></td>
+               <td style="vertical-align:middle"> <div class="panel panel-default" style=" margin-bottom:0px; height:80px; overflow-y: auto;"><div class="panel-body">
+1. Довжина векторного представлення тексту,<br>
+2.Маска для нульових елементів векторного представлення тексту,<br>
+3.Кількість нейронів у шарі ДКЧП,<br>
+4.Частка нейронів, які не будуть включені в процес навчання,<br>
+5. Ймовірність ігнорування нейроном вхідних сигналів з попереднього стану,<br>
+6.Кількість нейронів у звичайному шарі нейронної мережі,<br>
+7.Розмір вибірки, для здійснення однієї ітерації тренування моделі,
+8.Кількість періодів навчання нейронної мережі
+               </div></div></td>
+           </tr>
+       </table>
+       <script>
+        function myFunction(row) {
+         if(row.classList.length==0){
+            row.classList.add("active")
+         }
+         else{
+            row.classList.remove("active")
+         }
+        }
+</script>
+       <table class="table-condensed">
+           <tr>
+               <td><label for="freq">Число частості слів серед у текстах:</label></td>
+               <td><input type="number" id="freq" name="frequency" class="form-control" min="1" max="10000" value="5000" style="width: 7em"></td>
+           </tr>
+           <tr>
+               <td><label for="len">Число слів у текстах:</label></td>
+               <td><input type="number" id="len" name="length" class="form-control" min="1" max="600" maxlength="3" value="100"  style="width: 7em"></td>
+           </tr>
+       </table>
+       <H4>Введіть текст для визначення його тональності:</H4>
+       <textarea name="inputText" cols="50" rows="3" class="form-control" style="resize:None">The movie was awesome. I love it</textarea>
+       <br>
+       <div class="btn-group btn-group-justified">
+       <div class="btn-group"><button type="submit" class="btn btn-primary" >Почати навчання</button></div>
+       <div class="btn-group"><button type="submit" class="btn btn-primary" formaction="/load">Завантажити дані з бази даних</button>
+       </div>
+</div>
+</form>
+</div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <title>Flask Intro - login page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Сторінка авторизації</h1>
+      <br>
+      <h4>Введіть, будь ласка, свій логін та пароль:</h4>
+      <form action="login" method="POST">
+         <table class=" table-condensed">
+            <tr>
+                <td><p>Логін:</p></td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Username" name="username" value="{{
+          request.form.username }}">
+                </td>
+            </tr>
+            <tr>
+                <td><p>Пароль:</p></td>
+                <td>
+                    <input type="password" class="form-control" placeholder="Password" name="password" value="{{
+          request.form.password }}">
+                </td>
+              <td> <input class="btn btn-default" type="submit" value="Ввійти"></td>
+
+            </tr>
+           <tr>
+             <td colspan="2"> <h5>Новий користувач? <a methods="GET" href="{{ url_for('register') }}">Натисніть сюди</a></h5></td>
+             <td></td>
+           </tr>
+         </table>
+
+                     {% if error %}
+        <p class="error"><strong>Помилка:</strong> {{ error }}
+          {% endif %}</p>
+      </form>
+    </div>
+  </body>
+</html>
