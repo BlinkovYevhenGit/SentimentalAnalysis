@@ -5,8 +5,7 @@ import hashlib
 import AuthMongoManager
 from AuthMongoManager import updateUserAccess, loadAllUsers, saveUser, loadUser
 from Estimator import Estimator, deleteSavedImages
-from MongoManager import loadConfiguration, findRecordById, makeModelTable, makeResultTable
-
+from MongoManager import loadConfiguration, findRecordById, makeModelTable, makeResultTable, makeReportTable
 
 app = Flask(__name__)
 
@@ -227,7 +226,7 @@ def result():
         print(LSTM_config, CNN_config, Combined_config)
         estimator = Estimator()
         LSTM_config, CNN_config, Combined_config = allconfigsConvertToType(LSTM_config, CNN_config, Combined_config)
-        histories, lossList, accList, predictions, text_results, tableResult = estimator.estimate(top_words,
+        histories, lossList, accList, predictions, text_results, tableResult,report = estimator.estimate(top_words,
                                                                                                   review_max_length,
                                                                                                   Bayes_Input,
                                                                                                   LSTM_config,
@@ -244,6 +243,7 @@ def result():
         # else:
         #     prediction = 'Income less that 50K'
         table = makeResultTable(tableResult)
+        reportTable=makeReportTable(report)
         graph1_filename = os.path.join(graphFolder, 'graph1.png')
         graph2_filename = os.path.join(graphFolder, 'graph2.png')
 
@@ -251,7 +251,7 @@ def result():
                                # baes=predictions[0], cnn_lstm=predictions[1],
                                # cnn=predictions[2], lstm=predictions[3],
                                graph1=graph1_filename,
-                               graph2=graph2_filename, table=table)  # [histories[0:],lossList,accList]
+                               graph2=graph2_filename, table=table, reportTable=reportTable)  # [histories[0:],lossList,accList]
 
 
 def allconfigsConvertToType(lstmConfig, cnn_config, combined_config):

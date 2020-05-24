@@ -1,4 +1,4 @@
-from flask_table import Table, Col, ButtonCol
+from flask_table import Table, Col, ButtonCol, NestedTableCol
 
 
 class DataTable(Table):
@@ -25,4 +25,20 @@ class ResultTable(Table):
         Text = Col('Назва моделі')
         Prediction = Col('Значення тональності')
         PredictionClass = Col('Визначений клас тексту')
+
+class StatisticsTable(Table):
+        classes = ['table', 'table-striped', 'table-condensed', 'table-hover']
+        EpochNumber=Col('Номер епохи')
+        Accuracy=Col('Точність моделі')
+        Loss=Col('Значення функції втрат')
+class SubStageTable(Table):
+        classes = ['table', 'table-striped', 'table-condensed', 'table-hover']
+        StageName=Col("Назва етапу")
+        subStatisticsTable=NestedTableCol('Статистика моделі',StatisticsTable)
+class ReportTable(Table):
+        classes = ['table', 'table-striped', 'table-condensed', 'table-hover']
+        ModelName = Col('Назва моделі')
+        StageData=NestedTableCol("Дані етапу", SubStageTable)
+        TimeCol=Col('Час роботи')
+
 

@@ -61,13 +61,13 @@ class CNN_LSTM(Model):
         cnn_lstm_result,prediction,definedClass  = self.doPrediction(model, userText,review_len)
         return cnn_lstm_result,prediction,definedClass
 
-    def loadModel(self, filepath="cnn_lstm_model.h5"):
+    def loadModel(self, filepath):
         model = loadModelFromDB(filepath)
         return model
 
     def saveModel(self, model, filename="cnn_lstm_model.h5"):
-        saveToDB(filename, model)
-        saveConfiguration("cnn_lstm_model",self.max_words_number,self.max_review_len,self.configuration.getConfig(),filename)
+        fileID = saveToDB(filename, model)
+        saveConfiguration("cnn_lstm_model", self.max_words_number, self.max_review_len, self.configuration.getConfig(),fileID)
 
     def doPrediction(self, model, userText, max_review_len):
         print("New review:" + userText)

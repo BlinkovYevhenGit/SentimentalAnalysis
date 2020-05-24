@@ -35,7 +35,6 @@ class CNN(Model):
         print()
         print(format('How to setup a CNN model for sentiment analysis in Keras', '*^82'))
 
-        start_time = time.time()
         print()
         print(X_train.shape)
         print(X_train)
@@ -72,7 +71,7 @@ class CNN(Model):
         # history.history['acc'].append(eval_epoch_history[1])
         print("Accuracy: %.2f%%" % (eval_epoch_history[1] * 100))
         print()
-        print("Execution Time %s seconds: " % (time.time() - start_time))
+        #print("Execution Time %s seconds: " % (time.time() - start_time))
         self.saveModel(model)
         return model, history,eval_epoch_history
 
@@ -80,14 +79,13 @@ class CNN(Model):
         cnn_result,prediction,definedClass = self.doPrediction(model, userText,review_len)
         return cnn_result, prediction, definedClass
 
-    def loadModel(self, filepath="cnn_model.h5"):
+    def loadModel(self, filepath):
         model = loadModelFromDB(filepath)
-
         return model
 
     def saveModel(self, model, filename="cnn_model.h5"):
-        saveToDB(filename, model)
-        saveConfiguration("cnn_model",self.max_words_number,self.max_review_len,self.configuration.getConfig(),filename)
+        fileID = saveToDB(filename, model)
+        saveConfiguration("cnn_model",self.max_words_number,self.max_review_len,self.configuration.getConfig(),fileID)
 
     def doPrediction(self, model, userText, max_review_len):
         print("New review:" + userText)

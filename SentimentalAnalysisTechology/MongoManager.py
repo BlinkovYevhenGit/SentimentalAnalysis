@@ -5,7 +5,7 @@ import os
 
 from tensorflow import keras as K
 
-from DataTable import DataTable, ModelTable, ResultTable
+from DataTable import DataTable, ModelTable, ResultTable, ReportTable
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client['local']
@@ -27,22 +27,24 @@ def saveToDB(filename, model):
     model.save(mp)
     fileID = fs.put(open((r'Models\%s' % filename).replace('\\', '/'), 'rb'), filename=filename)
     os.remove(mp)
+    return fileID
 
 
 def loadModelFromDB(filepath):
-    out = fs.find_one({"filename": filepath})
+    out = fs.find_one({"_id": ObjectId(str(filepath))})
     weights_temp = out.read()
-    f_out_path = (r'Models\\' + filepath).replace('\\', '/')
+    f_out_path = (r'Models\\' + out.name).replace('\\', '/')
     with open(f_out_path, 'wb') as f:
         f.write(weights_temp)
-    model = K.models.load_model(".\\Models\\%s" % filepath)
+    model = K.models.load_model(".\\Models\\%s" % out.name)
     return model
 
 
 def saveConfiguration(modelName, top_words, review_len, model_config, filename):
     configToSave = {"ModelName": modelName, "TopWords": top_words, "MaxReviewLen": review_len,
                     "Configuration": model_config, "ModelFileName": filename}
-    modelsConfig.insert_one(configToSave)
+    fileid = modelsConfig.insert_one(configToSave)
+    return fileid
 
 
 def loadConfiguration(modelName):
@@ -72,4 +74,6 @@ def makeModelTable(data):
 
 def makeResultTable(data):
     return ResultTable(data)
+def makeReportTable(data):
+    return ReportTable(data)
 

@@ -51,9 +51,8 @@ def loadJSONData():
         'POS': 1
     }
     return reviews, sentiment_numerical_val
-def getIMDB_dataForBayes(top_words, maxlen):
+def getIMDB_dataForBayes(top_words, maxlen,train_data_raw, train_labels, test_data_raw, test_labels):
     #(train_data_raw, train_labels), (test_data_raw, test_labels) = K.datasets.imdb.load_data()#num_words=50000, maxlen=5000
-    train_data_raw, train_labels, test_data_raw, test_labels= loadData(top_words, maxlen)
     words2idx = K.datasets.imdb.get_word_index()
     idx2words = {idx: word for word, idx in words2idx.items()}
     train_set = []
@@ -88,7 +87,7 @@ def getIMDB_dataForBayes(top_words, maxlen):
     return train_set,train_labels,test_set,test_labels
 
 
-def loadBayesData(top_words, max_words_number):
+def loadBayesData(top_words, max_words_number,test_x, test_y, train_x, train_y):
     #reviews, sentiment_numerical_val = loadJSONData()
-    training_set, training_labels, validation_set, validation_labels = getIMDB_dataForBayes(top_words=top_words, maxlen=max_words_number)
+    training_set, training_labels, validation_set, validation_labels = getIMDB_dataForBayes(top_words=top_words, maxlen=max_words_number, train_data_raw=train_x, train_labels=train_y, test_data_raw=test_x, test_labels=test_y)
     return training_set, training_labels, validation_set, validation_labels
