@@ -14,4 +14,4 @@ The software section lists the development tools that have been used in this sof
 
 The technological section provides user guidance for using this program, as well as describes the test results.
 
- INFORMATION TECHNOLOGY, SENTIMENTAL ANALYSIS NAÏVE BAYES CLASSIFIER, NEURAL NETWORK, AUTOMATION.
+ INFORMATION TECHNOLOGY, SENTIMENTAL ANALYSIS, NAÏVE BAYES CLASSIFIER, NEURAL NETWORK, AUTOMATION.
